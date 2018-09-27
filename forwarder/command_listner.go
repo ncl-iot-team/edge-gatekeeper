@@ -23,14 +23,14 @@ type cmdChannelConfigType struct {
 func RunCommandListner(cmdGoChannel chan string) {
 
 	var cmdChannelConfig cmdChannelConfigType
-	cmdChannelConfig.name = viper.GetString("forwarder.cloud-rabbitmq.name")
-	cmdChannelConfig.mode = viper.GetString("forwarder.cloud-rabbitmq.mode")
-	cmdChannelConfig.protocol = viper.GetString("forwarder.cloud-rabbitmq.protocol")
-	cmdChannelConfig.host = viper.GetString("forwarder.cloud-rabbitmq.host")
-	cmdChannelConfig.port = viper.GetString("forwarder.cloud-rabbitmq.port")
-	cmdChannelConfig.user = viper.GetString("forwarder.cloud-rabbitmq.user")
-	cmdChannelConfig.password = viper.GetString("forwarder.cloud-rabbitmq.password")
-	cmdChannelConfig.channel = viper.GetString("forwarder.cloud-rabbitmq.channel")
+	cmdChannelConfig.name = viper.GetString("remote-commander.main.name")
+	cmdChannelConfig.mode = viper.GetString("remote-commander.main.mode")
+	cmdChannelConfig.protocol = viper.GetString("remote-commander.main.protocol")
+	cmdChannelConfig.host = viper.GetString("remote-commander.main.host")
+	cmdChannelConfig.port = viper.GetString("remote-commander.main.port")
+	cmdChannelConfig.user = viper.GetString("remote-commander.main.user")
+	cmdChannelConfig.password = viper.GetString("remote-commander.main.password")
+	cmdChannelConfig.channel = viper.GetString("remote-commander.main.channel")
 
 	connStr := fmt.Sprintf("%s://%s:%s@%s:%s", cmdChannelConfig.protocol, cmdChannelConfig.user, cmdChannelConfig.password, cmdChannelConfig.host, cmdChannelConfig.port)
 
@@ -53,13 +53,13 @@ func RunCommandListner(cmdGoChannel chan string) {
 		failOnError(err, "Failed to declare a queue")
 	*/
 	msgs, err := ch.Consume(
-		"edge-feed", // queue
-		"",          // consumer
-		true,        // auto-ack
-		false,       // exclusive
-		false,       // no-local
-		false,       // no-wait
-		nil,         // args
+		cmdChannelConfig.channel, // queue
+		"",                       // consumer
+		true,                     // auto-ack
+		false,                    // exclusive
+		false,                    // no-local
+		false,                    // no-wait
+		nil,                      // args
 	)
 	failOnError(err, "Failed to register a consumer")
 

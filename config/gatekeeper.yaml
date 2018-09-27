@@ -4,12 +4,12 @@ version: "1.0"
 listeners:
   tsensor1:
     mode: "File"
-    path: "/home/nipun/tsensor1"
+    path: "/Users/nipun/tsensor1"
     filename: "tsensor1_feed.dat"
   
   tsensor2:
     inputmode: "reddis"
-    path: "/home/nipun/tsensor1"
+    path: "/Users/nipun/tsensor2"
     host: "localhost"
     port: "6379"
 
@@ -21,6 +21,7 @@ forwarder:
     port: "5672"
     user: "edge-user"
     password: "edge-user"
+    channel: "edge-feed"
     windowsize: "10"
 
 remote-commander:

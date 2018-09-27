@@ -1,9 +1,10 @@
 package forwarder
 
 import (
+	"bufio"
 	"fmt"
 	"log"
-	"math/rand"
+	"os"
 	"strconv"
 	"time"
 
@@ -19,6 +20,7 @@ type forwarderConfig struct {
 	port       string
 	user       string
 	password   string
+	channel    string
 	windowsize string
 }
 
@@ -43,7 +45,15 @@ func RunForwarder(cmdGoChannel chan string) {
 	fwrdrConfig.user = viper.GetString("forwarder.cloud-rabbitmq.user")
 	fwrdrConfig.password = viper.GetString("forwarder.cloud-rabbitmq.password")
 	fwrdrConfig.windowsize = viper.GetString("forwarder.cloud-rabbitmq.windowsize")
-	windowsize, err := strconv.ParseInt("100", 10, 32)
+	fwrdrConfig.channel = viper.GetString("forwarder.cloud-rabbitmq.channel")
+	windowsize, err := strconv.ParseInt(fwrdrConfig.windowsize, 10, 32)
+
+	go func() {
+		for msg := range cmdGoChannel {
+			windowsize, err = strconv.ParseInt(msg, 10, 32)
+			failOnError(err, "Invalid Command")
+		}
+	}()
 
 	failOnError(err, "Invalid Config")
 
@@ -57,17 +67,37 @@ func RunForwarder(cmdGoChannel chan string) {
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
-		"edge-feed", // name
-		true,        // durable
-		false,       // delete when unused
-		false,       // exclusive
-		false,       // no-wait
-		nil,         // arguments
+		fwrdrConfig.channel, // name
+		true,                // durable
+		false,               // delete when unused
+		false,               // exclusive
+		false,               // no-wait
+		nil,                 // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
 
-	for i := 0; i < 10000000; i++ {
-		body := fmt.Sprintf("sensor_id:aq_mesh1758150, metric: Temperature, unit:Celsius, timestamp: %v, value: %v", time.Now().UnixNano(), float32(17+rand.Intn(5))+rand.Float32())
+	fileNameStr := fmt.Sprintf("%s/%s", viper.GetString("listeners.tsensor1.path"), viper.GetString("listeners.tsensor1.filename"))
+
+	failOnError(err, "Failed to open the file")
+	file, err := os.Open(fileNameStr)
+
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	defer file.Close()
+
+	reader := bufio.NewReader(file)
+	scanner := bufio.NewScanner(reader)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		//	fmt.Println(line)
+
+		body := line
+
 		err = ch.Publish(
 			"",     // exchange
 			q.Name, // routing key
@@ -77,9 +107,28 @@ func RunForwarder(cmdGoChannel chan string) {
 				ContentType: "text/plain",
 				Body:        []byte(body),
 			})
-		log.Printf(" [x] Sent %s", body)
+
+		log.Printf("Sent: %s", body)
+
 		failOnError(err, "Failed to publish a message")
+
 		time.Sleep(time.Millisecond * time.Duration(windowsize))
 	}
 
+	/*	for i := 0; i < 10000000; i++ {
+			body := fmt.Sprintf("sensor_id:aq_mesh1758150, metric: Temperature, unit:Celsius, timestamp: %v, value: %v", time.Now().UnixNano(), float32(17+rand.Intn(5))+rand.Float32())
+			err = ch.Publish(
+				"",     // exchange
+				q.Name, // routing key
+				false,  // mandatory
+				false,  // immediate
+				amqp.Publishing{
+					ContentType: "text/plain",
+					Body:        []byte(body),
+				})
+			log.Printf(" [x] Sent %s", body)
+			failOnError(err, "Failed to publish a message")
+			time.Sleep(time.Millisecond * time.Duration(windowsize))
+		}
+	*/
 }
