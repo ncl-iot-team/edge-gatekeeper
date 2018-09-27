@@ -73,7 +73,7 @@ func RunCommandListner(cmdGoChannel chan string) {
 		}
 	}()
 
-	log.Printf(" [*] Waiting for comands. To exit press CTRL+C")
+	log.Printf(" [*] Waiting for commands. To exit press CTRL+C")
 	<-forever
 
 }
