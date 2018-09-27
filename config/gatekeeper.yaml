@@ -1,0 +1,40 @@
+version: "1.0"
+
+
+listeners:
+  tsensor1:
+    mode: "File"
+    path: "/home/nipun/tsensor1"
+    filename: "tsensor1_feed.dat"
+  
+  tsensor2:
+    inputmode: "reddis"
+    path: "/home/nipun/tsensor1"
+    host: "localhost"
+    port: "6379"
+
+forwarder:
+  cloud-rabbitmq:
+    mode: "messaging"
+    protocol: "amqp"
+    host: "localhost"
+    port: "5672"
+    user: "edge-user"
+    password: "edge-user"
+    windowsize: "10"
+
+remote-commander:
+  main:
+    mode: "messaging"
+    protocol: "amqp"
+    host: "localhost"
+    port: "5672"
+    user: "edge-user"
+    password: "edge-user"
+    channel: "cmdr"
+
+
+  
+  
+  
+
