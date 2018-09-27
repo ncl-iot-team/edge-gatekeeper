@@ -79,40 +79,43 @@ func RunForwarder(cmdGoChannel chan string) {
 	fileNameStr := fmt.Sprintf("%s/%s", viper.GetString("listeners.tsensor1.path"), viper.GetString("listeners.tsensor1.filename"))
 
 	failOnError(err, "Failed to open the file")
-	file, err := os.Open(fileNameStr)
+	// Infinite Loop to send records foreever (For testing and benchmarking)
+	for {
+		file, err := os.Open(fileNameStr)
 
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 
-	defer file.Close()
+		defer file.Close()
 
-	reader := bufio.NewReader(file)
-	scanner := bufio.NewScanner(reader)
+		reader := bufio.NewReader(file)
+		scanner := bufio.NewScanner(reader)
 
-	for scanner.Scan() {
-		line := scanner.Text()
+		for scanner.Scan() {
+			line := scanner.Text()
 
-		//	fmt.Println(line)
+			//	fmt.Println(line)
 
-		body := line
+			body := line
 
-		err = ch.Publish(
-			"",     // exchange
-			q.Name, // routing key
-			false,  // mandatory
-			false,  // immediate
-			amqp.Publishing{
-				ContentType: "text/plain",
-				Body:        []byte(body),
-			})
+			err = ch.Publish(
+				"",     // exchange
+				q.Name, // routing key
+				false,  // mandatory
+				false,  // immediate
+				amqp.Publishing{
+					ContentType: "text/plain",
+					Body:        []byte(body),
+				})
 
-		log.Printf("Sent: %s", body)
+			log.Printf("Sent: %s", body)
 
-		failOnError(err, "Failed to publish a message")
+			failOnError(err, "Failed to publish a message")
 
-		time.Sleep(time.Millisecond * time.Duration(windowsize))
+			time.Sleep(time.Millisecond * time.Duration(windowsize))
+		}
 	}
 
 	/*	for i := 0; i < 10000000; i++ {
