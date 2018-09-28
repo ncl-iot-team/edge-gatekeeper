@@ -118,20 +118,4 @@ func RunForwarder(cmdGoChannel chan string) {
 		}
 	}
 
-	/*	for i := 0; i < 10000000; i++ {
-			body := fmt.Sprintf("sensor_id:aq_mesh1758150, metric: Temperature, unit:Celsius, timestamp: %v, value: %v", time.Now().UnixNano(), float32(17+rand.Intn(5))+rand.Float32())
-			err = ch.Publish(
-				"",     // exchange
-				q.Name, // routing key
-				false,  // mandatory
-				false,  // immediate
-				amqp.Publishing{
-					ContentType: "text/plain",
-					Body:        []byte(body),
-				})
-			log.Printf(" [x] Sent %s", body)
-			failOnError(err, "Failed to publish a message")
-			time.Sleep(time.Millisecond * time.Duration(windowsize))
-		}
-	*/
 }

@@ -52,6 +52,7 @@ func RunCommandListner(cmdGoChannel chan string) {
 		)
 		failOnError(err, "Failed to declare a queue")
 	*/
+
 	msgs, err := ch.Consume(
 		cmdChannelConfig.channel, // queue
 		"",                       // consumer

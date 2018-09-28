@@ -33,19 +33,7 @@ var runCmd = &cobra.Command{
 	Short: "Run the edge gatekeeper",
 	Long:  `Run the edge gatekeeper`,
 	Run: func(cmd *cobra.Command, args []string) {
-
-		var cmdGoChannel chan string = make(chan string)
-
-		fmt.Println("Running..")
-
-		//	for {
-		//		time.Sleep(time.Second * 1)
-		fmt.Printf("version: %s\n", viper.GetString("version"))
-		wg.Add(1)
-		go forwarder.RunCommandListner(cmdGoChannel)
-		go forwarder.RunForwarder(cmdGoChannel)
-		wg.Wait()
-		//	}
+		runGateKeeper()
 	},
 }
 
@@ -61,4 +49,16 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	runCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+// Run neccessary services for the gatekeeper to run
+func runGateKeeper() {
+
+	var cmdGoChannel = make(chan string)
+	fmt.Println("Running..")
+	fmt.Printf("version: %s\n", viper.GetString("version"))
+	wg.Add(1)
+	go forwarder.RunCommandListner(cmdGoChannel)
+	go forwarder.RunForwarder(cmdGoChannel)
+	wg.Wait()
 }
