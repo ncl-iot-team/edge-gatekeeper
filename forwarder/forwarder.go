@@ -31,7 +31,7 @@ func failOnError(err error, msg string) {
 }
 
 // RunForwarder runs all the configured forwarders
-func RunForwarder(cmdGoChannel chan string) {
+func RunForwarder(cmdGoChannel <-chan string) {
 
 	fmt.Println("Starting Forwarder")
 

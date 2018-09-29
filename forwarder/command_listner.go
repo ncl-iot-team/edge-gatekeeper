@@ -20,7 +20,7 @@ type cmdChannelConfigType struct {
 }
 
 // RunCommandListner listens remote commands
-func RunCommandListner(cmdGoChannel chan string) {
+func RunCommandListner(cmdGoChannel chan<- string) {
 
 	var cmdChannelConfig cmdChannelConfigType
 	cmdChannelConfig.name = viper.GetString("remote-commander.main.name")
