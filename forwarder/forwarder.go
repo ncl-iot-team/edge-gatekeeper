@@ -31,7 +31,7 @@ func failOnError(err error, msg string) {
 }
 
 // RunForwarder runs all the configured forwarders
-func RunForwarder(cmdGoChannel <-chan string) {
+func RunForwarder(windowSizeCmdGoChan <-chan int64) {
 
 	fmt.Println("Starting Forwarder")
 
@@ -46,12 +46,11 @@ func RunForwarder(cmdGoChannel <-chan string) {
 	fwrdrConfig.password = viper.GetString("forwarder.cloud-rabbitmq.password")
 	fwrdrConfig.windowsize = viper.GetString("forwarder.cloud-rabbitmq.windowsize")
 	fwrdrConfig.channel = viper.GetString("forwarder.cloud-rabbitmq.channel")
-	windowsize, err := strconv.ParseInt(fwrdrConfig.windowsize, 10, 32)
+	windowsize, err := strconv.ParseInt(fwrdrConfig.windowsize, 10, 64)
 
 	go func() {
-		for msg := range cmdGoChannel {
-			windowsize, err = strconv.ParseInt(msg, 10, 32)
-			failOnError(err, "Invalid Command")
+		for msg := range windowSizeCmdGoChan {
+			windowsize = msg
 		}
 	}()
 
@@ -79,6 +78,7 @@ func RunForwarder(cmdGoChannel <-chan string) {
 	fileNameStr := fmt.Sprintf("%s/%s", viper.GetString("listeners.tsensor1.path"), viper.GetString("listeners.tsensor1.filename"))
 
 	failOnError(err, "Failed to open the file")
+
 	// Infinite Loop to send records foreever (For testing and benchmarking)
 	for {
 		file, err := os.Open(fileNameStr)
@@ -94,14 +94,10 @@ func RunForwarder(cmdGoChannel <-chan string) {
 		scanner := bufio.NewScanner(reader)
 
 		for scanner.Scan() {
+
 			line := scanner.Text()
-
-			//	fmt.Println(line)
-
 			body := line
-
-			err = ch.Publish(
-				"",     // exchange
+			err = ch.Publish("", // exchange
 				q.Name, // routing key
 				false,  // mandatory
 				false,  // immediate
@@ -111,9 +107,7 @@ func RunForwarder(cmdGoChannel <-chan string) {
 				})
 
 			log.Printf("Sent: %s", body)
-
 			failOnError(err, "Failed to publish a message")
-
 			time.Sleep(time.Millisecond * time.Duration(windowsize))
 		}
 	}

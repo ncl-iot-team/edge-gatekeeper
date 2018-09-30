@@ -22,7 +22,7 @@ forwarder:
     user: "edge-user"
     password: "edge-user"
     channel: "edge-feed"
-    windowsize: "10"
+    windowsize: "5000"
 
 remote-commander:
   main:
@@ -34,8 +34,13 @@ remote-commander:
     password: "edge-user"
     channel: "cmdr"
 
-
-  
-  
-  
+monitoring-manager:
+  main:
+    mode: "messaging"
+    protocol: "amqp"
+    host: "localhost"
+    port: "5672"
+    user: "edge-user"
+    password: "edge-user"
+    channel: "system-stats"
 

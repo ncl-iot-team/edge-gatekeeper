@@ -17,7 +17,6 @@ package cmd
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/streadway/amqp"
@@ -36,8 +35,8 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("test called")
 		for {
-			var windowSize int
-			fmt.Scanf("%d", &windowSize)
+			var windowSize string
+			fmt.Scanln(&windowSize)
 			doTest(windowSize)
 		}
 	},
@@ -63,7 +62,7 @@ func failOnError(err error, msg string) {
 
 }
 
-func doTest(windowSize int) {
+func doTest(windowSize string) {
 	conn, err := amqp.Dial("amqp://edge-user:edge-user@localhost:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -82,7 +81,7 @@ func doTest(windowSize int) {
 	)
 	failOnError(err, "Failed to declare a queue")
 
-	body := fmt.Sprintf("%d", windowSize)
+	body := windowSize
 	err = ch.Publish(
 		"",     // exchange
 		q.Name, // routing key
@@ -94,6 +93,5 @@ func doTest(windowSize int) {
 		})
 	log.Printf(" [x] Sent %s", body)
 	failOnError(err, "Failed to publish a message")
-	time.Sleep(time.Millisecond * time.Duration(windowSize))
 
 }

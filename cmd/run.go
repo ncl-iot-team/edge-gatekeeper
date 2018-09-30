@@ -19,6 +19,7 @@ import (
 	"sync"
 
 	"github.com/nipunbalan/edge-gatekeeper/forwarder"
+	"github.com/nipunbalan/edge-gatekeeper/monitoring"
 
 	"github.com/spf13/viper"
 
@@ -54,11 +55,13 @@ func init() {
 // Run neccessary services for the gatekeeper to run
 func runGateKeeper() {
 
-	var cmdGoChannel = make(chan string)
+	var windowSizeCmdGoChan = make(chan int64)
+	var statsCmdGoChan = make(chan string)
 	fmt.Println("Running..")
 	fmt.Printf("version: %s\n", viper.GetString("version"))
 	wg.Add(1)
-	go forwarder.RunCommandListner(cmdGoChannel)
-	go forwarder.RunForwarder(cmdGoChannel)
+	go forwarder.RunCommandListner(windowSizeCmdGoChan, statsCmdGoChan)
+	go forwarder.RunForwarder(windowSizeCmdGoChan)
+	go monitoring.RunMonitoringD(statsCmdGoChan)
 	wg.Wait()
 }
