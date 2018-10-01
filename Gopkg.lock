@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  branch = "master"
+  digest = "1:c7a185cde82652bc37402f2509231ddac0b7f49c6bf75ebaa9a296172d0638f0"
+  name = "bitbucket.org/bertimus9/systemstat"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "0eeff89b0690611fc32e21f0cd2e4434abf8fe53"
+
+[[projects]]
   digest = "1:abeb38ade3f32a92943e5be54f55ed6d6e3b6602761d74b4aab4c9dd45c18abd"
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
@@ -162,6 +170,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "bitbucket.org/bertimus9/systemstat",
     "github.com/fsnotify/fsnotify",
     "github.com/mitchellh/go-homedir",
     "github.com/spf13/cobra",
