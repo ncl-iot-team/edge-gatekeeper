@@ -8,8 +8,8 @@ import (
 	"time"
 
 	systemstat "bitbucket.org/bertimus9/systemstat"
-	"github.com/nipunbalan/edge-mon/amqp"
 	"github.com/spf13/viper"
+	"github.com/streadway/amqp"
 )
 
 type statsChannelConfig struct {
