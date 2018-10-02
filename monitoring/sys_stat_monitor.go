@@ -101,7 +101,7 @@ func failOnError(err error, msg string) {
 // RunMonitoringD runs the monitoring daemon and continously retrives and calculate system stats.
 func RunMonitoringD(statsCmdGoChan <-chan string) {
 
-	fmt.Println("Starting Forwarder")
+	fmt.Println("Starting System Stat Monitoring")
 
 	var statschanconfig statsChannelConfig
 
