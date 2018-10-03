@@ -22,7 +22,7 @@ forwarder:
     user: "edge-user"
     password: "edge-user"
     channel: "edge-feed"
-    windowsize: "5000"
+    windowsize: "10"
 
 remote-commander:
   main:
