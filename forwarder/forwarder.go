@@ -47,6 +47,7 @@ func RunForwarder(windowSizeCmdGoChan <-chan int64) {
 	fwrdrConfig.windowsize = viper.GetString("forwarder.cloud-rabbitmq.windowsize")
 	fwrdrConfig.channel = viper.GetString("forwarder.cloud-rabbitmq.channel")
 	windowsize, err := strconv.ParseInt(fwrdrConfig.windowsize, 10, 64)
+	//ratecounterwindowsec, err := strconv.ParseInt(viper.GetString("forwarder.cloud-rabbitmq.ratecounterwindowsec"), 10, 64)
 
 	go func() {
 		for msg := range windowSizeCmdGoChan {
@@ -79,7 +80,12 @@ func RunForwarder(windowSizeCmdGoChan <-chan int64) {
 
 	failOnError(err, "Failed to open the file")
 
+	doCount := make(chan bool)
+	go NewRateCounter(time.Second*10, doCount)
+
+	log.Printf("Reading file and sending data to queue '%s'", q.Name)
 	// Infinite Loop to send records foreever (For testing and benchmarking)
+
 	for {
 		file, err := os.Open(fileNameStr)
 
@@ -92,7 +98,6 @@ func RunForwarder(windowSizeCmdGoChan <-chan int64) {
 
 		reader := bufio.NewReader(file)
 		scanner := bufio.NewScanner(reader)
-
 		for scanner.Scan() {
 
 			line := scanner.Text()
@@ -105,8 +110,8 @@ func RunForwarder(windowSizeCmdGoChan <-chan int64) {
 					ContentType: "text/plain",
 					Body:        []byte(body),
 				})
-
-			log.Printf("Sent: %s", body)
+			doCount <- true
+			//	log.Printf("Sent: %s", body)
 			failOnError(err, "Failed to publish a message")
 			time.Sleep(time.Millisecond * time.Duration(windowsize))
 		}
