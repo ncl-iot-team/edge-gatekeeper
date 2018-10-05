@@ -44,3 +44,13 @@ monitoring-manager:
     password: "edge-user"
     channel: "system-stats"
 
+remote-log-collector:
+  main:
+    mode: "messaging"
+    protocol: "amqp"
+    host: "monmgr"
+    port: "5672"
+    user: "edge-user"
+    password: "edge-user"
+    queue: "system-logs"
+
