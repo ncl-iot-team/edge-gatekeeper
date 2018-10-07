@@ -135,8 +135,8 @@ func newStats() *Stats {
 }
 
 func (s *Stats) setStats() {
-	fmt.Printf("Cpu(s): %.1f%%id\n", s.SysCPUAvg.IdlePct)
-	fmt.Printf("Mem: %9dk free\n", s.SysMemK.MemFree)
+	//	fmt.Printf("Cpu(s): %.1f%%id\n", s.SysCPUAvg.IdlePct)
+	//	fmt.Printf("Mem: %9dk free\n", s.SysMemK.MemFree)
 	simpleStats = SimpleStatsData{float32(s.SysCPUAvg.IdlePct), float32(s.SysMemK.MemFree)}
 }
 
