@@ -46,7 +46,7 @@ monitoring-manager:
     port: "5672"
     user: "edge-user"
     password: "edge-user"
-    channel: "system-stats"
+    queue: "system-stats"
 
 remote-log-collector:
   main:

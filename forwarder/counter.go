@@ -38,7 +38,15 @@ func NewRateCounter(window time.Duration, countChannel chan bool) {
 	go func() {
 		for {
 			time.Sleep(window)
-			recordCount(deviceid, window, &count, &deliveries)
+			//	log.Printf("Count: %d", *count)
+			simpleStats := getStats()
+			b := &simpleStats
+			bodyjson, err := json.Marshal(b)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			recordCount(deviceid, window, &count, &deliveries, string(bodyjson))
 		}
 	}()
 
@@ -48,15 +56,7 @@ func NewRateCounter(window time.Duration, countChannel chan bool) {
 
 }
 
-func recordCount(deviceid string, window time.Duration, count *int64, deliveries *chan string) {
-	//	log.Printf("Count: %d", *count)
-	simpleStats := getStats()
-	b := &simpleStats
-	bodyjson, err := json.Marshal(b)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+func recordCount(deviceid string, window time.Duration, count *int64, deliveries *chan string, bodyjson string) {
 
 	*deliveries <- fmt.Sprintf("%s | %s Sent Count: %d  |%s", time.Now().Format(time.RFC3339), deviceid, *count, bodyjson)
 	*count = 0
@@ -65,7 +65,6 @@ func recordCount(deviceid string, window time.Duration, count *int64, deliveries
 
 //NewSystemStatsForwarder forwards systems stats to a queue
 /*func NewSystemStatsForwarder(window time.Duration, countChannel chan bool) {
-
 	var sysStatsForwarderAMQPConnDetails AMQPConnDetailsType
 
 	sysStatsForwarderAMQPConnDetails.host = viper.GetString("monitoring-manager.main.host")
