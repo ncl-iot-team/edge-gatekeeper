@@ -31,14 +31,15 @@ func NewRateCounter(window time.Duration, countChannel chan bool) {
 
 	// Create new stats
 	stats := newStats()
-	stats.GatherStats(true)
-	//stats.PrintStats()
-	stats.setStats()
+
 	// Function generates a record at the end of the configured window
 	go func() {
 		for {
 			time.Sleep(window)
 			//	log.Printf("Count: %d", *count)
+			stats.GatherStats(true)
+			//stats.PrintStats()
+			stats.setStats()
 			simpleStats := getStats()
 			b := &simpleStats
 			bodyjson, err := json.Marshal(b)
