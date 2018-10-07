@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/nipunbalan/edge-mon/amqp"
+	"github.com/streadway/amqp"
 )
 
 //AMQPConnDetailsType is the structure definition for holding connection information
