@@ -12,7 +12,8 @@ import (
 	"github.com/streadway/amqp"
 )
 
-type statsChannelConfig struct {
+//StatsChannelConfig structure keeps the channel configuration
+type StatsChannelConfig struct {
 	name     string
 	mode     string
 	protocol string
@@ -20,10 +21,11 @@ type statsChannelConfig struct {
 	port     string
 	user     string
 	password string
-	channel  string
+	queue    string
 }
 
-type stats struct {
+//Stats struct stores the stats
+type Stats struct {
 	startTime time.Time
 
 	// stats this process
@@ -54,19 +56,21 @@ type SimpleStatsData struct {
 
 var simpleStats SimpleStatsData
 
-func newStats() *stats {
-	s := stats{}
+//NewStats creates new stats
+func NewStats() *Stats {
+	s := Stats{}
 	s.startTime = time.Now()
 	return &s
 }
 
-func (s *stats) setStats() {
+func (s *Stats) SetStats() {
 	fmt.Printf("Cpu(s): %.1f%%id\n", s.SysCPUAvg.IdlePct)
 	fmt.Printf("Mem: %9dk free\n", s.SysMemK.MemFree)
 	simpleStats = SimpleStatsData{float32(s.SysCPUAvg.IdlePct), float32(s.SysMemK.MemFree)}
 }
 
-func (s *stats) GatherStats(percent bool) {
+//GatherStats gathers stats
+func (s *Stats) GatherStats(percent bool) {
 	s.SysUptime = systemstat.GetUptime()
 	s.ProcUptime = time.Since(s.startTime).Seconds()
 
@@ -103,7 +107,7 @@ func RunMonitoringD(statsCmdGoChan <-chan string) {
 
 	fmt.Println("Starting System Stat Monitoring")
 
-	var statschanconfig statsChannelConfig
+	var statschanconfig StatsChannelConfig
 
 	statschanconfig.name = viper.GetString("monitoring-manager.main.name")
 	statschanconfig.mode = viper.GetString("monitoring-manager.main.mode")
@@ -112,11 +116,11 @@ func RunMonitoringD(statsCmdGoChan <-chan string) {
 	statschanconfig.port = viper.GetString("monitoring-manager.main.port")
 	statschanconfig.user = viper.GetString("monitoring-manager.main.user")
 	statschanconfig.password = viper.GetString("monitoring-manager.main.password")
-	statschanconfig.channel = viper.GetString("monitoring-manager.main.channel")
+	statschanconfig.queue = viper.GetString("monitoring-manager.main.queue")
 
 	log.Printf("Running Monitoring Agent Daemon..")
 
-	stats := newStats()
+	stats := NewStats()
 
 	connStr := fmt.Sprintf("%s://%s:%s@%s:%s", statschanconfig.protocol, statschanconfig.user, statschanconfig.password, statschanconfig.host, statschanconfig.port)
 	log.Printf("Connection String: %s", connStr)
@@ -129,12 +133,12 @@ func RunMonitoringD(statsCmdGoChan <-chan string) {
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
-		statschanconfig.channel, // name
-		true,                    // durable
-		false,                   // delete when unused
-		false,                   // exclusive
-		false,                   // no-wait
-		nil,                     // arguments
+		statschanconfig.queue, // name
+		true,                  // durable
+		false,                 // delete when unused
+		false,                 // exclusive
+		false,                 // no-wait
+		nil,                   // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
 
@@ -146,7 +150,7 @@ func RunMonitoringD(statsCmdGoChan <-chan string) {
 
 		stats.GatherStats(true)
 		//stats.PrintStats()
-		stats.setStats()
+		stats.SetStats()
 
 		statMode := strings.TrimLeft(msg, "get stats")
 
@@ -156,7 +160,7 @@ func RunMonitoringD(statsCmdGoChan <-chan string) {
 
 		default:
 			log.Printf("Sending Basic Stats to the server..")
-			simpleStats := getStats()
+			simpleStats := GetStats()
 			b := &simpleStats
 			bodyjson, err := json.Marshal(b)
 			if err != nil {
@@ -182,6 +186,7 @@ func RunMonitoringD(statsCmdGoChan <-chan string) {
 
 }
 
-func getStats() SimpleStatsData {
+//GetStats returns the simple stats
+func GetStats() SimpleStatsData {
 	return simpleStats
 }

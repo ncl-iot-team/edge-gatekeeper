@@ -1,5 +1,9 @@
 version: "1.0"
 
+device:
+  id: "E1"
+  name: "RPi3"
+
 
 listeners:
   tsensor1:
