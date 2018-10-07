@@ -3,7 +3,6 @@ package forwarder
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
 	"bitbucket.org/bertimus9/systemstat"
@@ -166,12 +165,6 @@ func (s *Stats) GatherStats(percent bool) {
 		s.ProcCPUAvg = systemstat.GetProcCPUAverage(s.LastProcCPUSample, s.CurProcCPUSample, s.ProcUptime)
 	}
 	s.procCPUSampled = true
-}
-
-func failOnError(err error, msg string) {
-	if err != nil {
-		log.Fatalf("%s: %s", msg, err)
-	}
 }
 
 /*
