@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/nipunbalan/edge-mon/systemstat"
+	"bitbucket.org/bertimus9/systemstat"
 	"github.com/spf13/viper"
 )
 
