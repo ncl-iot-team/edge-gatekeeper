@@ -94,7 +94,7 @@ func RunForwarder(windowSizeCmdGoChan <-chan int64) {
 			os.Exit(1)
 		}
 
-		defer file.Close()
+		//	defer
 
 		reader := bufio.NewReader(file)
 		scanner := bufio.NewScanner(reader)
@@ -115,6 +115,7 @@ func RunForwarder(windowSizeCmdGoChan <-chan int64) {
 			failOnError(err, "Failed to publish a message")
 			time.Sleep(time.Millisecond * time.Duration(windowsize))
 		}
+		file.Close()
 	}
 
 }
