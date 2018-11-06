@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -102,6 +103,7 @@ func RunForwarder(windowSizeCmdGoChan <-chan int64) {
 
 			line := scanner.Text()
 			body := line
+			doACalc()
 			err = ch.Publish("", // exchange
 				q.Name, // routing key
 				false,  // mandatory
@@ -118,4 +120,24 @@ func RunForwarder(windowSizeCmdGoChan <-chan int64) {
 		file.Close()
 	}
 
+}
+
+// Dummy calculation to pe
+func doACalc() {
+	done := make(chan int)
+
+	for i := 0; i < runtime.NumCPU(); i++ {
+		go func() {
+			for {
+				select {
+				case <-done:
+					return
+				default:
+				}
+			}
+		}()
+	}
+
+	time.Sleep(time.Second * 1)
+	close(done)
 }
