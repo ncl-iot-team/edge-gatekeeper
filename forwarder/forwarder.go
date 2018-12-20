@@ -138,6 +138,6 @@ func doACalc() {
 		}()
 	}
 
-	time.Sleep(time.Second * 1)
+	time.Sleep(time.Millisecond * 1)
 	close(done)
 }
