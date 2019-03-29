@@ -1,4 +1,4 @@
-version: "1.0"
+version: "2.0"
 
 device:
   id: "E1"
@@ -10,8 +10,12 @@ listeners:
     mode: "File"
     path: "/Users/nipun/tsensor1"
     filename: "tsensor1_feed.dat"
-  
   tsensor2:
+    mode: "File"
+    path: "/Users/nipun/Desktop/UOData/uo-data-download-3699222"
+    filename: "*.csv"
+
+  tsensor3:
     inputmode: "reddis"
     path: "/Users/nipun/tsensor2"
     host: "localhost"
@@ -26,7 +30,8 @@ forwarder:
     user: "edge-user"
     password: "edge-user"
     channel: "edge-feed"
-    windowsize: "1"
+    windowsize: "5"
+    rate: 2
 
 remote-commander:
   main:
