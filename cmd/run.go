@@ -18,7 +18,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/nipunbalan/edge-gatekeeper/ingest"
+	"github.com/nipunbalan/edge-gatekeeper/forwarder"
+	"github.com/nipunbalan/edge-gatekeeper/monitoring"
 	"github.com/spf13/viper"
 
 	"github.com/spf13/cobra"
@@ -53,14 +54,15 @@ func init() {
 // Run neccessary services for the gatekeeper to run
 func runGateKeeper() {
 
-	//var windowSizeCmdGoChan = make(chan int64)
-	//var statsCmdGoChan = make(chan string)
+	var dataRateCmdGoChan = make(chan int64)
+	var statsCmdGoChan = make(chan string)
 	fmt.Println("Running..")
 	fmt.Printf("version: %s\n", viper.GetString("version"))
-	//wg.Add(1)
-	//go forwarder.RunCommandListner(windowSizeCmdGoChan, statsCmdGoChan)
-	//go forwarder.RunForwarder(windowSizeCmdGoChan)
-	//go monitoring.RunMonitoringD(statsCmdGoChan)
-	ingest.RunReadSensorData()
-	//wg.Wait()
+	wg.Add(1)
+	go forwarder.RunCommandListner(dataRateCmdGoChan, statsCmdGoChan)
+	//	go forwarder.RunForwarder(windowSizeCmdGoChan)
+	go forwarder.RunForwarderWithRateLimiter(dataRateCmdGoChan)
+	go monitoring.RunMonitoringD(statsCmdGoChan)
+	//	ingest.RunReadSensorData()
+	wg.Wait()
 }

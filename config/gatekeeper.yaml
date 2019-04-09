@@ -4,6 +4,12 @@ device:
   id: "E1"
   name: "RPi3"
 
+messaging:
+  protocol: mqtt
+  topic: sensordata
+  broker: localhost:1883
+  dataratereadseconds: 10
+
 
 listeners:
   tsensor1:
@@ -25,41 +31,41 @@ forwarder:
   cloud-rabbitmq:
     mode: "messaging"
     protocol: "amqp"
-    host: "monmgr"
+    host: "mqserver-01.technipun.com"
     port: "5672"
     user: "edge-user"
-    password: "edge-user"
-    channel: "edge-feed"
-    windowsize: "5"
-    rate: 2
+    password: "M4cQJb8eB6FP"
+    channel: "data"
+    datarate: 10000
+    deliverybuffer: 4096
 
 remote-commander:
   main:
     mode: "messaging"
     protocol: "amqp"
-    host: "monmgr"
+    host: "mqserver-01.technipun.com"
     port: "5672"
     user: "edge-user"
-    password: "edge-user"
-    channel: "cmdr"
+    password: "M4cQJb8eB6FP"
+    channel: "command-e1"
 
 monitoring-manager:
   main:
     mode: "messaging"
     protocol: "amqp"
-    host: "monmgr"
+    host: "mqserver-01.technipun.com"
     port: "5672"
     user: "edge-user"
-    password: "edge-user"
-    queue: "system-stats"
+    password: "M4cQJb8eB6FP"
+    queue: "system-stats-e1"
 
 remote-log-collector:
   main:
     mode: "messaging"
     protocol: "amqp"
-    host: "monmgr"
+    host: "mqserver-01.technipun.com"
     port: "5672"
     user: "edge-user"
-    password: "edge-user"
-    queue: "system-logs"
+    password: "M4cQJb8eB6FP"
+    queue: "system-stats-e1"
 

@@ -21,14 +21,14 @@ type cmdChannelConfigType struct {
 	channel  string
 }
 
-var windowSizeCmdGoChanGlobal chan<- int64
+var dataRateCmdGoChanGlobal chan<- int64
 
 var statsCmdGoChanGlobal chan<- string
 
 // RunCommandListner listens remote commands
-func RunCommandListner(windowSizeCmdGoChan chan<- int64, statsCmdGoChan chan<- string) {
+func RunCommandListner(dataRateCmdGoChan chan<- int64, statsCmdGoChan chan<- string) {
 
-	windowSizeCmdGoChanGlobal = windowSizeCmdGoChan
+	dataRateCmdGoChanGlobal = dataRateCmdGoChan
 
 	statsCmdGoChanGlobal = statsCmdGoChan
 
@@ -76,17 +76,17 @@ func evalCommand(msgs <-chan amqp.Delivery) {
 	for d := range msgs {
 		log.Printf("Received a command: %s", d.Body)
 		command := string(d.Body)
-		if strings.HasPrefix(command, "set windowsize") {
+		if strings.HasPrefix(command, "set datarate") {
 
-			windowSizeStr := strings.TrimLeft(command, "set windowsize")
+			datarateStr := strings.TrimLeft(command, "set datarate")
 
 			//	windowsize := int64(100)
 
-			windowSize, err := strconv.ParseInt(windowSizeStr, 10, 32)
+			datarate, err := strconv.ParseInt(datarateStr, 10, 32)
 
 			failOnError(err, "Invalid parameter")
 
-			windowSizeCmdGoChanGlobal <- windowSize
+			dataRateCmdGoChanGlobal <- datarate
 
 		} else if strings.HasPrefix(command, "get stats") {
 
