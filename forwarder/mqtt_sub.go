@@ -11,9 +11,9 @@ import (
 )
 
 //InitMQTTClient Initiates the MQTT client and connects to the broker
-func InitMQTTClient(clientid string, deliveries *chan string, dataRateReadSeconds int) {
+func InitMQTTClient(clientid string, deliveries *chan string, dataRateDisplayInterval int) {
 
-	topic := viper.GetString("messaging.topic")
+	topic := viper.GetString("messaging.data_topic")
 	broker := viper.GetString("messaging.broker")
 	//	password := viper.GetString("messaging.password")
 	//	user := viper.GetString("messaging.user")
@@ -68,8 +68,9 @@ func InitMQTTClient(clientid string, deliveries *chan string, dataRateReadSecond
 	//Go routine to print out data sending rate
 	go func() {
 		for {
-			fmt.Printf("%s | Data receive rate at '%s' : %d \t records/sec\n", time.Now().Format(time.RFC3339), clientid, counter.Rate())
-			time.Sleep(time.Second * time.Duration(dataRateReadSeconds))
+			//fmt.Printf("%s | Data receive rate at '%s' : %d \t records/sec\n", time.Now().Format(time.RFC3339), clientid, counter.Rate())
+			fmt.Printf("%d | Data receive rate at '%s' : %d \t records/sec\n", time.Now().UnixNano(), clientid, counter.Rate())
+			time.Sleep(time.Second * time.Duration(dataRateDisplayInterval))
 		}
 	}()
 

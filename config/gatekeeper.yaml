@@ -6,7 +6,8 @@ device:
 
 messaging:
   protocol: mqtt
-  topic: sensordata
+  data_topic: sensordata
+  command_topic: command1
   broker: localhost:1883
   dataratereadseconds: 10
 
@@ -38,6 +39,7 @@ forwarder:
     channel: "data"
     datarate: 10000
     deliverybuffer: 4096
+
 
 remote-commander:
   main:
