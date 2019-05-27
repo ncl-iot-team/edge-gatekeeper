@@ -7,7 +7,8 @@ import (
 
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	RATECOUNTER "github.com/paulbellamy/ratecounter"
-	PSUTIL "github.com/shirou/gopsutil/cpu"
+	PSUTILCPU "github.com/shirou/gopsutil/cpu"
+	PSUTILMEM "github.com/shirou/gopsutil/mem"
 	"github.com/spf13/viper"
 )
 
@@ -69,10 +70,13 @@ func InitMQTTClient(clientid string, deliveries *chan string, dataRateDisplayInt
 	//Go routine to print out data sending rate
 	go func() {
 		for {
-			percent, _ := PSUTIL.Percent(0, false)
-			//fmt.Printf("%s | Data receive rate at '%s' : %d \t records/sec\n", time.Now().Format(time.RFC3339), clientid, counter.Rate())
-			fmt.Printf("%d | Data receive rate at '%s' : %d \t records/sec\n | CPU:%d", time.Now().UnixNano(), clientid, counter.Rate(), percent[0])
+			percent, _ := PSUTILCPU.Percent(0, false)
+			mem, _ := PSUTILMEM.VirtualMemory()
 
+			//fmt.Printf("%s | Data receive rate at '%s' : %d \t records/sec\n", time.Now().Format(time.RFC3339), clientid, counter.Rate())
+			//	fmt.Printf("%d | Data receive rate at '%s' : %d \t records/sec\n | CPU:%d", time.Now().UnixNano(), clientid, counter.Rate(), percent[0])
+			//fmt.Printf("%d | Data receive rate at '%s' : %d \t records/sec\n ", time.Now().UnixNano(), clientid, counter.Rate())
+			fmt.Printf("%d,%d,%f,%f", time.Now().UnixNano(), counter.Rate(), percent[0], mem.UsedPercent)
 			time.Sleep(time.Second * time.Duration(dataRateDisplayInterval))
 		}
 	}()
