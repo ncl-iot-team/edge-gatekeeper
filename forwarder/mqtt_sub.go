@@ -76,7 +76,7 @@ func InitMQTTClient(clientid string, deliveries *chan string, dataRateDisplayInt
 			//fmt.Printf("%s | Data receive rate at '%s' : %d \t records/sec\n", time.Now().Format(time.RFC3339), clientid, counter.Rate())
 			//	fmt.Printf("%d | Data receive rate at '%s' : %d \t records/sec\n | CPU:%d", time.Now().UnixNano(), clientid, counter.Rate(), percent[0])
 			//fmt.Printf("%d | Data receive rate at '%s' : %d \t records/sec\n ", time.Now().UnixNano(), clientid, counter.Rate())
-			fmt.Printf("%d,%d,%f,%f", time.Now().UnixNano(), counter.Rate(), percent[0], mem.UsedPercent)
+			fmt.Printf("%d,%d,%f,%f\n", time.Now().UnixNano(), counter.Rate(), percent[0], mem.UsedPercent)
 			time.Sleep(time.Second * time.Duration(dataRateDisplayInterval))
 		}
 	}()
