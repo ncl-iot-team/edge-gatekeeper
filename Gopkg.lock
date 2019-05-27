@@ -115,11 +115,12 @@
   version = "v1.4.0"
 
 [[projects]]
-  digest = "1:bfc1b9ae0c8c925613f67faff48d1330cdfc48e70073b3bd0645290373aa9165"
+  digest = "1:cab0e10b4421b432b41ae745de588354ee9b9b9a407b26c6af59bdd6dd02ac0e"
   name = "github.com/shirou/gopsutil"
   packages = [
     "cpu",
     "internal/common",
+    "mem",
   ]
   pruneopts = "UT"
   revision = "fa9845945e5b5c6ffb19b436586ff702a30417c5"
@@ -248,6 +249,7 @@
     "github.com/mitchellh/go-homedir",
     "github.com/paulbellamy/ratecounter",
     "github.com/shirou/gopsutil/cpu",
+    "github.com/shirou/gopsutil/mem",
     "github.com/spf13/cobra",
     "github.com/spf13/viper",
     "github.com/streadway/amqp",
