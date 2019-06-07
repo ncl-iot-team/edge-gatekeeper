@@ -80,11 +80,11 @@ func InitMQTTClient(clientid string, deliveries *chan string, dataRateDisplayInt
 			time.Sleep(time.Second * time.Duration(dataRateDisplayInterval))
 		}
 	}()
-	i := 1
+	//i := 1
 	for {
 		incoming := <-choke
-		fmt.Printf("Message No: %d\n", i)
-		i++
+		//	fmt.Printf("Message No: %d\n", i)
+		//	i++
 		*deliveries <- incoming[1]
 		counter.Incr(1)
 		//	fmt.Printf("RECEIVED TOPIC: %s MESSAGE: %s\n", incoming[0], incoming[1])
