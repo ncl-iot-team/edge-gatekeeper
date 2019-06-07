@@ -83,7 +83,7 @@ func InitMQTTClient(clientid string, deliveries *chan string, dataRateDisplayInt
 	i := 1
 	for {
 		incoming := <-choke
-		fmt.Printf("Message No: %d", i)
+		fmt.Printf("Message No: %d\n", i)
 		i++
 		*deliveries <- incoming[1]
 		counter.Incr(1)
