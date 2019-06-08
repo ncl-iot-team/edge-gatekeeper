@@ -100,27 +100,27 @@ func RunForwarderWithRateLimiter(dataRateCmdGoChan <-chan (int64)) {
 	// Go routine to initiate and run the MQTT Client for collect sensor data
 	go InitMQTTClient(clientid, &deliveries, dataratereadseconds, topic, broker)
 
-	mqttStoredMessage := 0
+	mqttStoredMessageSizeTopic := "$SYS/broker/store/messages/count"
+
+	// Go routine to initiate and run the MQTT Client for collect sensor data
+	go InitMQTTClient(clientid, &statsDeliveries, 0, mqttStoredMessageSizeTopic, broker)
+
+	mqttStoredMessage := "0"
 	//Go routine get mqtt stats
 	go func() {
 		for {
 			mqttStoredMessage = <-statsDeliveries
-		//	limit := rate.Limit(newlimit)
-		//	limiter.SetLimit(limit)
-	//		fmt.Printf("New datarate set for %s: %d records/sec\n", clientid, newlimit)
+			//	limit := rate.Limit(newlimit)
+			//	limiter.SetLimit(limit)
+			//		fmt.Printf("New datarate set for %s: %d records/sec\n", clientid, newlimit)
 		}
 	}()
-
-	mqttStoredMessageSizeTopic := '$SYS/broker/store/messages/count'
-
-	// Go routine to initiate and run the MQTT Client for collect sensor data
-	go InitMQTTClient(clientid, &statsDeliveries, 0, mqttStoredMessageSizeTopic, broker)
 
 	for {
 
 		//fmt.Println("InLoop")
 		msg := <-deliveries
-		msg = msg + ","+ mqttStoredMessageSizeTopic
+		msg = msg + "," + mqttStoredMessage
 
 		//fmt.Println("Publishing messsage: " + msg)
 
