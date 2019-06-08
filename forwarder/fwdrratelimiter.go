@@ -43,6 +43,9 @@ func RunForwarderWithRateLimiter(dataRateCmdGoChan <-chan (int64)) {
 	clientid := viper.GetString("device.id")
 	deliverybuffer := viper.GetInt64("forwarder.deliverybuffer")
 
+	topic := viper.GetString("messaging.data_topic")
+	broker := viper.GetString("messaging.broker")
+
 	connStr := fmt.Sprintf("%s://%s:%s@%s:%s", fwrdrConfig.protocol, fwrdrConfig.user, fwrdrConfig.password, fwrdrConfig.host, fwrdrConfig.port)
 	conn, err := amqp.Dial(connStr)
 	failOnError(err, "Failed to connect to RabbitMQ")
@@ -63,6 +66,8 @@ func RunForwarderWithRateLimiter(dataRateCmdGoChan <-chan (int64)) {
 	failOnError(err, "Failed to declare a queue")
 
 	deliveries := make(chan string, deliverybuffer)
+
+	statsDeliveries := make(chan string, deliverybuffer)
 
 	dataratereadseconds := viper.GetInt("messaging.dataratereadseconds")
 
@@ -92,13 +97,30 @@ func RunForwarderWithRateLimiter(dataRateCmdGoChan <-chan (int64)) {
 		}
 	}()
 
-	// Go routine to initiate and run the MQTT Client
-	go InitMQTTClient(clientid, &deliveries, dataratereadseconds)
+	// Go routine to initiate and run the MQTT Client for collect sensor data
+	go InitMQTTClient(clientid, &deliveries, dataratereadseconds, topic, broker)
+
+	mqttStoredMessage := 0
+	//Go routine get mqtt stats
+	go func() {
+		for {
+			mqttStoredMessage = <-statsDeliveries
+		//	limit := rate.Limit(newlimit)
+		//	limiter.SetLimit(limit)
+	//		fmt.Printf("New datarate set for %s: %d records/sec\n", clientid, newlimit)
+		}
+	}()
+
+	mqttStoredMessageSizeTopic := '$SYS/broker/store/messages/count'
+
+	// Go routine to initiate and run the MQTT Client for collect sensor data
+	go InitMQTTClient(clientid, &statsDeliveries, 0, mqttStoredMessageSizeTopic, broker)
 
 	for {
 
 		//fmt.Println("InLoop")
 		msg := <-deliveries
+		msg = msg + ","+ mqttStoredMessageSizeTopic
 
 		//fmt.Println("Publishing messsage: " + msg)
 
