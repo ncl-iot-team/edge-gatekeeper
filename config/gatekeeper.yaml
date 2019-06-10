@@ -8,7 +8,7 @@ messaging:
   protocol: mqtt
   data_topic: sensordata
   command_topic: command1
-  broker: localhost:1883
+  broker: pilab-01:1883
   dataratereadseconds: 10
 
 

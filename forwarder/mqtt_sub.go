@@ -7,15 +7,17 @@ import (
 
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	RATECOUNTER "github.com/paulbellamy/ratecounter"
+
 	PSUTILCPU "github.com/shirou/gopsutil/cpu"
 	PSUTILMEM "github.com/shirou/gopsutil/mem"
+	"github.com/spf13/viper"
 )
 
 //InitMQTTClient Initiates the MQTT client and connects to the broker
-func InitMQTTClient(clientid string, deliveries *chan string, dataRateDisplayInterval int, topic string, broker string) {
+func InitMQTTClient(clientid string, deliveries *chan string, dataRateDisplayInterval int) {
 
-	//topic := viper.GetString("messaging.data_topic")
-	//broker := viper.GetString("messaging.broker")
+	topic := viper.GetString("messaging.data_topic")
+	broker := viper.GetString("messaging.broker")
 	//	password := viper.GetString("messaging.password")
 	//	user := viper.GetString("messaging.user")
 	id := clientid
@@ -66,28 +68,26 @@ func InitMQTTClient(clientid string, deliveries *chan string, dataRateDisplayInt
 
 	counter := RATECOUNTER.NewRateCounter(1 * time.Second)
 
+	mqttStoredMessages := "0"
+
+	go InitMQTTStatsClient(clientid, &mqttStoredMessages)
+
 	//Go routine to print out data sending rate
+	go func() {
+		for {
+			percent, _ := PSUTILCPU.Percent(0, true)
+			mem, _ := PSUTILMEM.VirtualMemory()
 
-	if dataRateDisplayInterval != 0 {
-		go func() {
-			for {
-				percent, _ := PSUTILCPU.Percent(0, true)
-				mem, _ := PSUTILMEM.VirtualMemory()
-
-				//fmt.Printf("%s | Data receive rate at '%s' : %d \t records/sec\n", time.Now().Format(time.RFC3339), clientid, counter.Rate())
-				//	fmt.Printf("%d | Data receive rate at '%s' : %d \t records/sec\n | CPU:%d", time.Now().UnixNano(), clientid, counter.Rate(), percent[0])
-				//fmt.Printf("%d | Data receive rate at '%s' : %d \t records/sec\n ", time.Now().UnixNano(), clientid, counter.Rate())
-				fmt.Printf("%d,%d,%f,%f,%f,%f,%f\n", time.Now().UnixNano(), counter.Rate(), percent[0], percent[1], percent[2], percent[3], mem.UsedPercent)
-				//fmt.Printf("%d,%d\n", time.Now().UnixNano(), counter.Rate())
-				time.Sleep(time.Second * time.Duration(dataRateDisplayInterval))
-			}
-		}()
-	}
-	//i := 1
+			//fmt.Printf("%s | Data receive rate at '%s' : %d \t records/sec\n", time.Now().Format(time.RFC3339), clientid, counter.Rate())
+			//	fmt.Printf("%d | Data receive rate at '%s' : %d \t records/sec\n | CPU:%d", time.Now().UnixNano(), clientid, counter.Rate(), percent[0])
+			//fmt.Printf("%d | Data receive rate at '%s' : %d \t records/sec\n ", time.Now().UnixNano(), clientid, counter.Rate())
+			fmt.Printf("%d,%d,%f,%f,%f,%f,%f,%s\n", time.Now().UnixNano(), counter.Rate(), percent[0], percent[1], percent[2], percent[3], mem.UsedPercent, mqttStoredMessages)
+			//fmt.Printf("%d,%d,%s\n", time.Now().UnixNano(), counter.Rate(), mqttStoredMessages)
+			time.Sleep(time.Second * time.Duration(dataRateDisplayInterval))
+		}
+	}()
 	for {
 		incoming := <-choke
-		//	fmt.Printf("Message No: %d\n", i)
-		//	i++
 		*deliveries <- incoming[1]
 		counter.Incr(1)
 		//	fmt.Printf("RECEIVED TOPIC: %s MESSAGE: %s\n", incoming[0], incoming[1])
