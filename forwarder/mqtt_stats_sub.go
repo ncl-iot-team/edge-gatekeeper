@@ -17,8 +17,8 @@ func InitMQTTStatsClient(clientid string, mqttStoredMessages *string) {
 	topic := "$SYS/broker/store/messages/count"
 	broker := viper.GetString("messaging.broker")
 	id := clientid + "_stats"
-	cleansess := false
-	qos := 1
+	cleansess := true
+	qos := 0
 	store := ":memory:"
 
 	if topic == "" {
@@ -58,7 +58,9 @@ func InitMQTTStatsClient(clientid string, mqttStoredMessages *string) {
 
 	for {
 		incoming := <-choke
-		*mqttStoredMessages = incoming[1]
+		if incoming[0] == topic {
+			*mqttStoredMessages = incoming[1]
+		}
 	}
 
 }

@@ -88,8 +88,10 @@ func InitMQTTClient(clientid string, deliveries *chan string, dataRateDisplayInt
 	}()
 	for {
 		incoming := <-choke
-		*deliveries <- incoming[1]
-		counter.Incr(1)
+		if incoming[0] == topic {
+			*deliveries <- incoming[1]
+			counter.Incr(1)
+		}
 		//	fmt.Printf("RECEIVED TOPIC: %s MESSAGE: %s\n", incoming[0], incoming[1])
 	}
 
