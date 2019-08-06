@@ -3,7 +3,6 @@ package forwarder
 import (
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -21,14 +20,16 @@ type cmdChannelConfigType struct {
 	channel  string
 }
 
-var windowSizeCmdGoChanGlobal chan<- int64
+var dataRateCmdGoChanGlobal chan<- int64
+
+var sensorCommandChannel chan<- string
 
 var statsCmdGoChanGlobal chan<- string
 
 // RunCommandListner listens remote commands
-func RunCommandListner(windowSizeCmdGoChan chan<- int64, statsCmdGoChan chan<- string) {
+func RunCommandListner(dataRateCmdGoChan chan<- int64, sensorCommandChannel chan<- string, statsCmdGoChan chan<- string) {
 
-	windowSizeCmdGoChanGlobal = windowSizeCmdGoChan
+	dataRateCmdGoChanGlobal = dataRateCmdGoChan
 
 	statsCmdGoChanGlobal = statsCmdGoChan
 
@@ -74,19 +75,39 @@ func RunCommandListner(windowSizeCmdGoChan chan<- int64, statsCmdGoChan chan<- s
 
 func evalCommand(msgs <-chan amqp.Delivery) {
 	for d := range msgs {
-		log.Printf("Received a command: %s", d.Body)
-		command := string(d.Body)
-		if strings.HasPrefix(command, "set windowsize") {
 
-			windowSizeStr := strings.TrimLeft(command, "set windowsize")
+		log.Printf("Received a command: %s", d.Body)
+
+		command := strings.ToLower(string(d.Body))
+
+		if strings.HasPrefix(command, "set e_fwd_rt") {
 
 			//	windowsize := int64(100)
+			log.Printf("Received 'SET E_FWD_RT command :%s", command)
 
-			windowSize, err := strconv.ParseInt(windowSizeStr, 10, 32)
+			thisDevice := viper.GetString("device.id")
 
-			failOnError(err, "Invalid parameter")
+			deviceID := thisDevice
 
-			windowSizeCmdGoChanGlobal <- windowSize
+			datarate := viper.GetInt64("forwarder.cloud-rabbitmq.datarate")
+
+			//		datarate, err := strconv.ParseInt(datarateStr, 10, 32)
+
+			_, err := fmt.Sscanf(command, "set e_fwd_rt %s %d", &deviceID, &datarate)
+
+			if deviceID == deviceID {
+
+				dataRateCmdGoChanGlobal <- datarate
+
+			}
+
+			failOnError(err, "Invalid command")
+
+		} else if strings.HasPrefix(command, "set s_rt") {
+
+			log.Printf("Received 'SET S_RT command :%s", command)
+
+			MQTTCommander(viper.GetString("device.id"), command)
 
 		} else if strings.HasPrefix(command, "get stats") {
 

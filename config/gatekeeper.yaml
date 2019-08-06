@@ -1,8 +1,15 @@
-version: "1.0"
+version: "2.0"
 
 device:
   id: "E1"
   name: "RPi3"
+
+messaging:
+  protocol: mqtt
+  data_topic: sensordata
+  command_topic: command1
+  broker: pilab-01:1883
+  dataratereadseconds: 10
 
 
 listeners:
@@ -10,8 +17,12 @@ listeners:
     mode: "File"
     path: "/Users/nipun/tsensor1"
     filename: "tsensor1_feed.dat"
-  
   tsensor2:
+    mode: "File"
+    path: "/Users/nipun/Desktop/UOData/uo-data-download-3699222"
+    filename: "*.csv"
+
+  tsensor3:
     inputmode: "reddis"
     path: "/Users/nipun/tsensor2"
     host: "localhost"
@@ -21,40 +32,42 @@ forwarder:
   cloud-rabbitmq:
     mode: "messaging"
     protocol: "amqp"
-    host: "monmgr"
+    host: "mqserver-01.technipun.com"
     port: "5672"
     user: "edge-user"
-    password: "edge-user"
-    channel: "edge-feed"
-    windowsize: "1"
+    password: "M4cQJb8eB6FP"
+    channel: "data"
+    datarate: 10000
+    deliverybuffer: 4096
+
 
 remote-commander:
   main:
     mode: "messaging"
     protocol: "amqp"
-    host: "monmgr"
+    host: "mqserver-01.technipun.com"
     port: "5672"
     user: "edge-user"
-    password: "edge-user"
-    channel: "cmdr"
+    password: "M4cQJb8eB6FP"
+    channel: "command-e1"
 
 monitoring-manager:
   main:
     mode: "messaging"
     protocol: "amqp"
-    host: "monmgr"
+    host: "mqserver-01.technipun.com"
     port: "5672"
     user: "edge-user"
-    password: "edge-user"
-    queue: "system-stats"
+    password: "M4cQJb8eB6FP"
+    queue: "system-stats-e1"
 
 remote-log-collector:
   main:
     mode: "messaging"
     protocol: "amqp"
-    host: "monmgr"
+    host: "mqserver-01.technipun.com"
     port: "5672"
     user: "edge-user"
-    password: "edge-user"
-    queue: "system-logs"
+    password: "M4cQJb8eB6FP"
+    queue: "system-stats-e1"
 
